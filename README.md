@@ -1,141 +1,135 @@
-# Merchant Order Management System
+# Merchant Order App
 
-A responsive order management system that automatically switches between real API data and mock data based on token availability.
+A self-order application built using Next.js (App Router) based on the provided wireframe. This project smartly switches between real API and mock data based on token availability.
 
-## Features
+---
 
-- ✅ **Smart API Fallback**: Automatically uses mock data when API token is unavailable
-- ✅ **Real API Integration**: Fetches from `https://recruitment-spe.vercel.app/api/v1/products`
-- ✅ **Fully Responsive**: Optimized for mobile, tablet, and desktop
-- ✅ **Order Management**: Create, view, and delete orders
-- ✅ **Stock Validation**: Prevents over-ordering
-- ✅ **Real-time Calculations**: Automatic price calculations
-- ✅ **Local Storage**: Orders persist in browser storage
+##  Features
 
-## Setup Instructions
+- Fully responsive (mobile-first)
+- Product listing from API or mock
+- Create, view, and delete order
+- Order summary and calculations
+- Quantity handling with confirmation dialog
+- Token-based API integration with fallback
+- LocalStorage persistence
+
+---
+
+## Tech Stack
+
+- **Next.js** (App Router)
+- **React Hook Form** + **Zod** for form validation
+- **Tailwind CSS** for styling
+- **LocalStorage** for order persistence
+- **Mock & Real API switching** via `.env`
+
+---
+
+## Getting Started
 
 ### 1. Install Dependencies
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+npm install --legacy-peer-deps
+```
 
 ### 2. Configure API Token (Optional)
+```bash
+cp .env.local.example .env.local
+```
+Fill in the token:
+```env
+NEXT_PUBLIC_API_TOKEN=your_token_here
+```
 
-**Option A: With API Token**
-1. Copy the environment file:
-   \`\`\`bash
-   cp .env.local.example .env.local
-   \`\`\`
-2. Edit `.env.local` and add your token:
-   \`\`\`env
-   NEXT_PUBLIC_API_TOKEN=your_actual_token_here
-   \`\`\`
+If token is not provided, the app uses mock data.
 
-**Option B: Without API Token**
-- Skip the environment setup
-- The app will automatically use mock data
-
-### 3. Run the Application
-\`\`\`bash
+### 3. Run App Locally
+```bash
 npm run dev
-\`\`\`
+```
+Visit: [http://localhost:3000](http://localhost:3000)
 
-### 4. Open in Browser
-Navigate to `http://localhost:3000`
+---
 
-## How It Works
+## 🧪 Test Scope & Behavior
 
-### API Fallback Logic
-1. **Check Token**: If `NEXT_PUBLIC_API_TOKEN` is not set → Use mock data
-2. **Test Connection**: Try to connect to the API endpoint
-3. **Handle Errors**: If API fails → Fallback to mock data
-4. **Success**: If API works → Use real data
+### Page 1: Order List
+- Displays:
+  - **Thumbnail**, **name**, **description** per product
+  - **Editable quantity**
+  - **Unit price** from API
+  - **Subtotal** = quantity × price
+- Total price displayed at bottom
+- **+ button** increases quantity (disabled at stock max)
+- **- button**:
+  - If quantity = 1 → triggers **Delete popup**
+- **Delete popup**
+  - "Cancel" closes dialog
+  - "Delete" removes order
+- **Add Order** navigates to Add page
 
-### Data Sources
-- **Real API**: Products from `https://recruitment-spe.vercel.app/api/v1/products`
-- **Mock Data**: 5 sample products with realistic data
-- **Orders**: Stored in browser localStorage (both modes)
+### Page 2: Add Order
+- Dropdown to select product
+- Auto-fills:
+  - Description
+  - Unit Price
+- Input for quantity:
+  - Must be numeric
+  - Max = stock
+- Calculates and displays **total**
+- Save button adds to order list and redirects
+- Back button returns to order list
 
-### Status Indicator
-- 🟢 **Green Badge**: Connected to real API
-- 🟡 **Yellow Badge**: Using mock data
-- 🔄 **Refresh Button**: Check API status again
-
-## Development vs Production
-
-### Development (No Token)
-- Uses mock data automatically
-- Perfect for local development
-- No external dependencies
-- Fast and reliable
-
-### Production (With Token)
-- Connects to real API
-- Falls back to mock data if API fails
-- Handles network errors gracefully
-- Shows connection status to users
-
-## File Structure
-
-\`\`\`
-├── app/
-│   ├── page.tsx              # Home page
-│   ├── orders/
-│   │   ├── page.tsx          # Order list
-│   │   └── add/page.tsx      # Add order
-│   └── layout.tsx            # Root layout
-├── components/
-│   ├── api-status-indicator.tsx  # API status display
-│   └── delete-order-dialog.tsx   # Delete confirmation
-├── lib/
-│   └── api.ts                # API logic with fallback
-└── .env.local.example        # Environment template
-\`\`\`
+---
 
 ## API Integration
 
-### Headers Required
-\`\`\`javascript
-{
-  "Authorization": "Bearer YOUR_TOKEN",
-  "Accept": "application/json",
-  "Content-Type": "application/json"
-}
-\`\`\`
-
 ### Endpoint
-\`\`\`
+```
 GET https://recruitment-spe.vercel.app/api/v1/products
-\`\`\`
+```
 
-### Response Format
-The app handles various response formats:
-- Direct array: `[{product1}, {product2}]`
-- Nested in data: `{data: [{product1}, {product2}]}`
-- Nested in products: `{products: [{product1}, {product2}]}`
+### Headers
+```http
+Authorization: Bearer YOUR_TOKEN
+Accept: application/json
+Content-Type: application/json
+```
 
-## Troubleshooting
+### Example cURL
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+     -H "Accept: application/json" \
+     https://recruitment-spe.vercel.app/api/v1/products
+```
 
-### Mock Data Always Shows
-- Check if `.env.local` exists and has the correct token
-- Verify the token is valid by testing the API manually
-- Check browser console for connection errors
+### Fallback Logic
+- No token or fetch error → fallback to mock data
+- Status indicator:
+  - 🟢 Connected to real API
+  - 🟡 Using mock data
 
-### API Connection Issues
-- Verify internet connection
-- Check if the API endpoint is accessible
-- Confirm the token hasn't expired
-- Look for CORS issues in browser console
+---
 
-### Orders Not Persisting
-- Orders are stored in localStorage
-- Clear browser data will remove orders
-- Use browser dev tools → Application → Local Storage to inspect
+## Data Handling
 
-## Contributing
+- **Orders** stored in `localStorage`
+- **Products** from API or fallback mock
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with both mock and real API data
-5. Submit a pull request
+---
+
+## Submission Instructions
+
+1. Push code to a **Private GitHub repo**
+2. Invite `spe.laboratory@gmail.com` as **collaborator**
+3. Ensure **multiple commits** exist (not a single bulk commit)
+4. Send the **GitHub repo link** via email
+
+
+---
+
+## 📎 Links
+- 🧪 [Live Demo](https://merchant-order.vercel.app)
+- 💻 [GitHub Repo](https://github.com/Aul-rhmn/merchant-order)
